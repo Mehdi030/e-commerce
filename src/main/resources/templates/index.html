@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<h1>Willkommen im Shopping Cart!</h1>
+<p>Hier kannst du Produkte kaufen.</p>
+
+<ul>
+    <li><a th:href="@{/products}">Produkte ansehen</a></li>
+    <li><a th:href="@{/cart}">Warenkorb anzeigen</a></li>
+</ul>
+</body>
+</html>
