@@ -1,34 +1,28 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Warenkorb</title>
-    <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-
-<h1>🛒 Dein Warenkorb</h1>
-
-<table border="1">
+<table>
+    <thead>
     <tr>
         <th>Produkt</th>
         <th>Menge</th>
         <th>Preis</th>
-        <th>Aktion</th>
+        <th>Aktionen</th>
     </tr>
-    <tr th:each="item : ${cartItems}">
-        <td th:text="${item.product.name}"></td>
-        <td th:text="${item.quantity}"></td>
-        <td th:text="${item.totalPrice} + ' €'"></td>
+    </thead>
+    <tbody>
+    <!-- Schleife über alle CartItems -->
+    <tr th:each="cartItem : ${cartItems}">
+        <td th:text="${cartItem.product.name}"></td>
         <td>
-            <form th:action="@{/cart/remove/{id}(id=${item.id})}" method="post">
+            <form th:action="@{/cart/update/{cartId}/{productId}(cartId=${cartItem.cart.id}, productId=${cartItem.product.id})}" method="post">
+                <input type="number" name="quantity" th:value="${cartItem.quantity}" min="1" required />
+                <button type="submit">Aktualisieren</button>
+            </form>
+        </td>
+        <td th:text="${cartItem.price}"></td>
+        <td>
+            <form th:action="@{/cart/remove/{cartItemId}(cartItemId=${cartItem.id})}" method="post">
                 <button type="submit">Entfernen</button>
             </form>
         </td>
     </tr>
+    </tbody>
 </table>
-
-<a href="/products">🛍️ Weiter einkaufen</a>
-
-</body>
-</html>
