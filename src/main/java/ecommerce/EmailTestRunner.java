@@ -23,3 +23,4 @@ public class EmailTestRunner implements CommandLineRunner {
         }
     }
 }
+

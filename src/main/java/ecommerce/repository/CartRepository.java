@@ -10,3 +10,4 @@ public interface CartRepository extends JpaRepository<Cart, UUID> {
     List<Cart> findByCreatedAtBefore(LocalDateTime time); // Findet alle älteren Warenkörbe
     void deleteByCreatedAtBefore(LocalDateTime time); // Löscht alle älteren Warenkörbe
 }
+

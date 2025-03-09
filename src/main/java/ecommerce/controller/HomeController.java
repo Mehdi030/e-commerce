@@ -11,3 +11,4 @@ public class HomeController {
         return "index"; // Lädt die Datei src/main/resources/templates/index.html
     }
 }
+

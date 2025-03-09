@@ -24,7 +24,8 @@ public class DataLoader implements CommandLineRunner {
         if (productRepository.count() == 0) {
             List<Product> products = Arrays.asList(
                     new Product("Laptop", "Leistungsstarker Gaming-Laptop", new BigDecimal("1499.99")),
-                    new Product("Smartphone", "High-End Smartphone mit OLED-Display", new BigDecimal("899.99"))
+                    new Product("Smartphone", "High-End Smartphone mit OLED-Display", new BigDecimal("899.99")),
+                new Product("Tablet", "Mid-End Tablet mit 4K-Display", new BigDecimal("699.99"))
             );
             productRepository.saveAll(products);
             System.out.println("✅ Test-Produkte wurden hinzugefügt!");

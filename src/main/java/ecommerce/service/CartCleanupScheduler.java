@@ -23,3 +23,4 @@ public class CartCleanupScheduler {
         System.out.println("🗑️ Alte Warenkorb-Items gelöscht");
     }
 }
+

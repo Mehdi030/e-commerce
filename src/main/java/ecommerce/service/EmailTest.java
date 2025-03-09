@@ -26,3 +26,4 @@ public class EmailTest {
         System.out.println("✅ Test-Mail wurde erfolgreich gesendet!");
     }
 }
+

@@ -17,3 +17,4 @@ public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
     // ✅ Gibt alle Einträge eines bestimmten Benutzers zurück (wenn wir User später hinzufügen)
     List<CartItem> findByCreatedAtAfter(LocalDateTime recentTime);
 }
+

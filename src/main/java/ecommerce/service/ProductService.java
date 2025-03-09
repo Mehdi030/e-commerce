@@ -36,3 +36,4 @@ public class ProductService {
         return productRepository.findAll(Sort.by(Sort.Direction.ASC, "price"));
     }
 }
+
