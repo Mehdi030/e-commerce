@@ -6,6 +6,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -33,13 +36,14 @@ public class UserService {
     }
 
     @Transactional
-    public User confirmUser(UUID userId) {
-        User user = userRepository.findById(userId).orElse(null);
-        if (user != null && !user.isConfirmed()) {
-            user.setConfirmed(true);
-            userRepository.save(user);
-        }
-        return user;
+    public Optional<User> confirmUser(UUID userId) {
+        return userRepository.findById(userId).map(user -> {
+            if (!user.isConfirmed()) {
+                user.setConfirmed(true);
+                userRepository.save(user);
+            }
+            return user;
+        });
     }
 
     public boolean emailExists(String email) {

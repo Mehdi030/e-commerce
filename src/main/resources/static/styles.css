@@ -33,3 +33,17 @@ a:hover {
     text-decoration: underline;
 }
 
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+form {
+    display: inline-block;
+    text-align: left;
+}
+
+input {
+    display: block;
+    margin-bottom: 10px;
+}

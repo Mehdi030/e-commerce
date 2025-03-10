@@ -1,22 +1,31 @@
-<!-- register.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Registrierung</title>
+  <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
 <h2>Registrierung</h2>
+
+<!-- Fehlermeldungen anzeigen -->
+<p th:if="${message}" th:text="${message}" style="color: green;"></p>
+
 <form th:action="@{/auth/register}" method="post" th:object="${user}">
   <label>Benutzername:</label>
   <input type="text" th:field="*{username}" required/><br/>
+  <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" style="color:red;"></span><br/>
 
   <label>Email:</label>
   <input type="email" th:field="*{email}" required/><br/>
+  <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" style="color:red;"></span><br/>
 
   <label>Passwort:</label>
   <input type="password" th:field="*{password}" required/><br/>
+  <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" style="color:red;"></span><br/>
 
   <button type="submit">Registrieren</button>
 </form>
+
+<p>Schon registriert? <a th:href="@{/auth/login}">Hier einloggen</a></p>
 </body>
 </html>

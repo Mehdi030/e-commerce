@@ -3,6 +3,10 @@ package ecommerce.controller;
 import ecommerce.entity.User;
 import ecommerce.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,9 +20,11 @@ import java.util.UUID;
 public class AuthController {
 
     private final UserService userService;
+    private final AuthenticationManager authenticationManager;
 
-    public AuthController(UserService userService) {
+    public AuthController(UserService userService, AuthenticationManager authenticationManager) {
         this.userService = userService;
+        this.authenticationManager = authenticationManager;
     }
 
     // Zeigt das Registrierungsformular an
@@ -35,7 +41,6 @@ public class AuthController {
             return "register";
         }
 
-        // Überprüfen, ob die E-Mail bereits existiert
         if (userService.emailExists(user.getEmail())) {
             result.rejectValue("email", "error.user", "Diese E-Mail ist bereits registriert.");
             return "register";
@@ -61,7 +66,30 @@ public class AuthController {
 
     // Zeigt die Login-Seite an
     @GetMapping("/login")
-    public String showLoginForm() {
+    public String showLoginForm(Model model) {
+        model.addAttribute("error", false);
         return "login";
+    }
+
+    // Verarbeitung des Logins
+    @PostMapping("/login")
+    public String login(@RequestParam String email, @RequestParam String password, Model model) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, password)
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            return "redirect:/";
+        } catch (Exception e) {
+            model.addAttribute("error", "Ungültige Anmeldeinformationen!");
+            return "login";
+        }
+    }
+
+    @GetMapping("/logout")
+    public String logout() {
+        SecurityContextHolder.clearContext();
+        return "redirect:/auth/login?logout";
     }
 }
