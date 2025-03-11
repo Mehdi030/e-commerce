@@ -1,20 +1,23 @@
-# Verwende ein Java 17 Image
+# Use Java 17 as base image
 FROM openjdk:17-jdk-slim
 
-# Setze das Arbeitsverzeichnis im Container
+# Set working directory inside the container
 WORKDIR /app
 
-# Kopiere das gesamte Projekt in den Container
+# Copy everything from the project directory
 COPY . .
 
-# Baue das JAR-File innerhalb des Containers
+# 🔥 Make sure `gradlew` is executable
+RUN chmod +x gradlew
+
+# Build the project inside the container
 RUN ./gradlew build --no-daemon
 
-# Kopiere das erstellte JAR-File
+# Copy the generated JAR file
 COPY build/libs/*.jar app.jar
 
-# Exponiere Port 8080
+# Expose port 8080
 EXPOSE 8080
 
-# Starte die Spring Boot Anwendung
+# Run the application
 CMD ["java", "-jar", "app.jar"]
