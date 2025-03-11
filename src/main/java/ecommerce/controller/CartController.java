@@ -5,11 +5,13 @@ import ecommerce.service.CartService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.support.SessionStatus;
 
 import java.util.UUID;
 
 @Controller
 @RequestMapping("/cart")
+@SessionAttributes("cartId") // 🔥 Speichert `cartId` in der Session
 public class CartController {
 
     private final CartService cartService;
@@ -18,34 +20,40 @@ public class CartController {
         this.cartService = cartService;
     }
 
+    @ModelAttribute("cartId")
+    public UUID initializeCart() {
+        return UUID.randomUUID(); // Falls keine Session existiert, neuen Warenkorb erstellen
+    }
+
     @GetMapping
-    public String showCart(@RequestParam UUID cartId, Model model) {
+    public String showCart(@ModelAttribute("cartId") UUID cartId, Model model) {
         Cart cart = cartService.getCart(cartId);
         model.addAttribute("cart", cart);
         return "cart";
     }
 
-    @PostMapping("/add/{cartId}/{productId}")
-    public String addToCart(@PathVariable UUID cartId, @PathVariable UUID productId, @RequestParam int quantity) {
+    @PostMapping("/add/{productId}")
+    public String addToCart(@ModelAttribute("cartId") UUID cartId, @PathVariable UUID productId, @RequestParam int quantity) {
         cartService.addItemToCart(cartId, productId, quantity);
-        return "redirect:/cart?cartId=" + cartId;
+        return "redirect:/cart";
     }
 
-    @PostMapping("/remove/{cartId}/{productId}")
-    public String removeFromCart(@PathVariable UUID cartId, @PathVariable UUID productId) {
+    @PostMapping("/remove/{productId}")
+    public String removeFromCart(@ModelAttribute("cartId") UUID cartId, @PathVariable UUID productId) {
         cartService.removeItemFromCart(cartId, productId);
-        return "redirect:/cart?cartId=" + cartId;
+        return "redirect:/cart";
     }
 
-    @PostMapping("/update/{cartId}/{productId}")
-    public String updateCartItem(@PathVariable UUID cartId, @PathVariable UUID productId, @RequestParam int quantity) {
+    @PostMapping("/update/{productId}")
+    public String updateCartItem(@ModelAttribute("cartId") UUID cartId, @PathVariable UUID productId, @RequestParam int quantity) {
         cartService.updateItemQuantity(cartId, productId, quantity);
-        return "redirect:/cart?cartId=" + cartId;
+        return "redirect:/cart";
     }
 
-    @PostMapping("/clear/{cartId}")
-    public String clearCart(@PathVariable UUID cartId) {
+    @PostMapping("/clear")
+    public String clearCart(@ModelAttribute("cartId") UUID cartId, SessionStatus sessionStatus) {
         cartService.clearCart(cartId);
-        return "redirect:/cart?cartId=" + cartId;
+        sessionStatus.setComplete(); // 🔥 Beendet die Session und löscht `cartId`
+        return "redirect:/cart";
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,99 +26,66 @@ public class CartService {
         this.productRepository = productRepository;
     }
 
-    // ✅ Warenkorb abrufen
     public Cart getCart(UUID cartId) {
-        return cartRepository.findById(cartId).orElseThrow(() -> new IllegalArgumentException("Warenkorb nicht gefunden"));
-    }
-
-    // ✅ Produkt in Warenkorb legen oder Menge erhöhen
-    public Cart addItemToCart(UUID cartId, UUID productId, int quantity) {
-        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new IllegalArgumentException("Warenkorb nicht gefunden"));
-        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("Produkt nicht gefunden"));
-
-        // Prüfen, ob Produkt bereits im Warenkorb ist
-        CartItem cartItem = cart.getCartItems().stream()
-                .filter(item -> item.getProduct().getId().equals(productId))
-                .findFirst()
-                .orElse(null);
-
-        if (cartItem == null) {
-            cartItem = new CartItem();
-            cartItem.setCart(cart);
-            cartItem.setProduct(product);
-            cartItem.setQuantity(quantity);
-            cartItem.setPrice(product.getPrice().multiply(BigDecimal.valueOf(quantity)));
-
-            cart.getCartItems().add(cartItem);
-        } else {
-            cartItem.setQuantity(cartItem.getQuantity() + quantity);
-            cartItem.setPrice(product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
-        }
-
-        updateTotalPrice(cart);
-        cartItemRepository.save(cartItem);
-        return cartRepository.save(cart);
-    }
-
-    // ✅ Produkt aus Warenkorb entfernen
-    public Cart removeItemFromCart(UUID cartId, UUID productId) {
-        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new IllegalArgumentException("Warenkorb nicht gefunden"));
-
-        cart.getCartItems().removeIf(cartItem -> {
-            if (cartItem.getProduct().getId().equals(productId)) {
-                cartItemRepository.delete(cartItem);
-                return true;
-            }
-            return false;
+        return cartRepository.findById(cartId).orElseGet(() -> {
+            Cart newCart = new Cart();
+            cartRepository.save(newCart);
+            return newCart;
         });
-
-        updateTotalPrice(cart);
-        return cartRepository.save(cart);
     }
 
-    // ✅ Produktmenge im Warenkorb aktualisieren
-    public Cart updateItemQuantity(UUID cartId, UUID productId, int newQuantity) {
-        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new IllegalArgumentException("Warenkorb nicht gefunden"));
-        CartItem cartItem = cart.getCartItems().stream()
-                .filter(item -> item.getProduct().getId().equals(productId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Produkt nicht im Warenkorb"));
+    public void addItemToCart(UUID cartId, UUID productId, int quantity) {
+        Cart cart = getCart(cartId);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Produkt nicht gefunden"));
 
-        if (newQuantity <= 0) {
-            cart.getCartItems().remove(cartItem);
-            cartItemRepository.delete(cartItem);
-        } else {
-            cartItem.setQuantity(newQuantity);
-            cartItem.setPrice(cartItem.getProduct().getPrice().multiply(BigDecimal.valueOf(newQuantity)));
+        Optional<CartItem> existingItem = cart.getCartItems().stream()
+                .filter(item -> item.getProduct().getId().equals(productId))
+                .findFirst();
+
+        if (existingItem.isPresent()) {
+            CartItem cartItem = existingItem.get();
+            cartItem.setQuantity(cartItem.getQuantity() + quantity);
             cartItemRepository.save(cartItem);
+        } else {
+            CartItem newItem = new CartItem(cart, product, quantity);
+            cart.getCartItems().add(newItem);
+            cartItemRepository.save(newItem);
         }
 
         updateTotalPrice(cart);
-        return cartRepository.save(cart);
+        cartRepository.save(cart);
     }
 
-    // ✅ Gesamten Warenkorb leeren
+    public void removeItemFromCart(UUID cartId, UUID productId) {
+        Cart cart = getCart(cartId);
+        cart.getCartItems().removeIf(item -> item.getProduct().getId().equals(productId));
+        updateTotalPrice(cart);
+        cartRepository.save(cart);
+    }
+
+    public void updateItemQuantity(UUID cartId, UUID productId, int quantity) {
+        Cart cart = getCart(cartId);
+        cart.getCartItems().forEach(item -> {
+            if (item.getProduct().getId().equals(productId)) {
+                item.setQuantity(quantity);
+            }
+        });
+        updateTotalPrice(cart);
+        cartRepository.save(cart);
+    }
+
     public void clearCart(UUID cartId) {
-        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new IllegalArgumentException("Warenkorb nicht gefunden"));
-        cartItemRepository.deleteAll(cart.getCartItems());
+        Cart cart = getCart(cartId);
         cart.getCartItems().clear();
         cart.setTotalPrice(BigDecimal.ZERO);
         cartRepository.save(cart);
     }
 
-    // ✅ Automatische Löschung alter Warenkörbe (nach 30 Minuten)
-    public void removeOldCarts() {
-        LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(30);
-        List<Cart> oldCarts = cartRepository.findByCreatedAtBefore(expirationTime);
-        cartRepository.deleteAll(oldCarts);
-    }
-
-    // ✅ Berechnung des Gesamtpreises
     private void updateTotalPrice(Cart cart) {
-        BigDecimal totalPrice = cart.getCartItems().stream()
-                .map(CartItem::getPrice)
+        BigDecimal total = cart.getCartItems().stream()
+                .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        cart.setTotalPrice(totalPrice);
+        cart.setTotalPrice(total);
     }
 }
-
