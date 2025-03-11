@@ -19,8 +19,9 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // 🔐 Stellt sicher, dass Passwörter sicher gespeichert werden.
+        return new BCryptPasswordEncoder();
     }
+
 
     @Bean
     public UserDetailsService userDetailsService(CustomUserDetailsService customUserDetailsService) {
@@ -38,21 +39,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.disable()) // CSRF deaktivieren (nur für Testzwecke!)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/login", "/static/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/auth/**").denyAll() // ❌ Login- und Auth-Seiten sind blockiert!
+                        .anyRequest().permitAll() // ✅ Alle anderen Seiten sind frei zugänglich
                 )
-                .formLogin(login -> login
-                        .loginPage("/auth/login")
-                        .defaultSuccessUrl("/", true) // Nach erfolgreichem Login zur Startseite weiterleiten
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/auth/login?logout")
-                        .permitAll()
-                );
+                .formLogin(login -> login.disable()) // Login komplett deaktivieren
+                .httpBasic(httpBasic -> httpBasic.disable()); // Basic Auth ebenfalls deaktivieren
 
         return http.build();
     }
+
+
 }

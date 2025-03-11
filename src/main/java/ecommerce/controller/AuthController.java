@@ -71,17 +71,38 @@ public class AuthController {
         return "login";
     }
 
-    // Verarbeitung des Logins
+    // Verarbeitung des Logins mit Spring Security
     @PostMapping("/login")
     public String login(@RequestParam String email, @RequestParam String password, Model model) {
+        System.out.println("🛠 Login-Versuch für: " + email);
+
+        if (email == null || email.trim().isEmpty()) {
+            System.out.println("❌ E-Mail ist NULL oder LEER!");
+            model.addAttribute("error", "Ungültige Anmeldeinformationen!");
+            return "login";
+        }
+
+        User user = userService.findByEmail(email);
+        System.out.println("🔍 Gesuchte E-Mail: " + email);
+
+        if (user == null) {
+            System.out.println("❌ Benutzer nicht gefunden in der Datenbank!");
+            // Zeige alle gespeicherten User an (prüfe, ob die E-Mail vorhanden ist)
+            userService.printAllUsers();
+            model.addAttribute("error", "Ungültige Anmeldeinformationen!");
+            return "login";
+        }
+        System.out.println("✅ Benutzer gefunden: " + user.getEmail());
+
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );
-
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            System.out.println("✅ Login erfolgreich für: " + email);
             return "redirect:/";
         } catch (Exception e) {
+            System.out.println("❌ Login fehlgeschlagen: " + e.getMessage());
             model.addAttribute("error", "Ungültige Anmeldeinformationen!");
             return "login";
         }

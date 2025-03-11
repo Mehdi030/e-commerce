@@ -10,21 +10,29 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
+    @Column(nullable = false, length = 255)
     private String name;
+
+    @Column(length = 1000)
     private String description;
+
+    @Column(length = 500)
+    private String imageUrl;
+
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    // Standard-Konstruktor (wird von Hibernate benötigt)
-    public Product() {}
-
-    // Konstruktor ohne UUID (damit Hibernate sie selbst setzt)
-    public Product(String name, String description, BigDecimal price) {
-        this.name = name;
-        this.description = description;
-        // ID wird automatisch durch @GeneratedValue erzeugt
+    public Product() {
+        this.price = BigDecimal.ZERO;
     }
 
-    // ✅ Getter & Setter
+    public Product(String name, String description, BigDecimal price, String imageUrl) {
+        this.name = name;
+        this.description = (description != null) ? description : "";
+        this.price = (price != null) ? price : BigDecimal.ZERO;
+        this.imageUrl = (imageUrl != null) ? imageUrl : "";
+    }
+
     public UUID getId() {
         return id;
     }
@@ -46,7 +54,7 @@ public class Product {
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description = (description != null) ? description : "";
     }
 
     public BigDecimal getPrice() {
@@ -54,7 +62,14 @@ public class Product {
     }
 
     public void setPrice(BigDecimal price) {
-        this.price = price;
+        this.price = (price != null) ? price : BigDecimal.ZERO;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = (imageUrl != null) ? imageUrl : "";
     }
 }
-

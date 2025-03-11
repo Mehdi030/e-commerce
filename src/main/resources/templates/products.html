@@ -2,31 +2,26 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Produkte</title>
+  <title>Produktliste</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-<h1>Produktliste</h1>
+<body class="bg-white text-gray-900 dark:bg-black dark:text-white flex items-center justify-center min-h-screen">
+<div class="max-w-4xl bg-gray-100 dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+  <h1 class="text-3xl font-bold text-red-600">📦 Produktliste</h1>
 
-<table border="1">
-  <tr>
-    <th>Name</th>
-    <th>Preis</th>
-    <th>Aktionen</th>
-  </tr>
-  <tr th:each="product : ${products}">
-    <td th:text="${product.name}"></td>
-    <td th:text="${product.price}"></td>
-    <td>
-      <a th:href="@{/products/{id}(id=${product.id})}">Details</a>
-      <form th:action="@{/products/{id}/delete(id=${product.id})}" method="post" style="display:inline;">
-        <button type="submit">Löschen</button>
+  <div class="grid grid-cols-2 gap-6 mt-6">
+    <div th:each="product : ${products}" class="border border-gray-300 dark:border-gray-700 p-4 rounded-lg">
+      <img th:src="${product.imageUrl}" alt="Produktbild" class="w-full h-40 object-cover rounded">
+      <h3 class="text-lg font-bold mt-2" th:text="${product.name}"></h3>
+      <p class="text-gray-700 dark:text-gray-300 mt-2" th:text="${product.price} + '€'"></p>
+
+      <a th:href="@{/products/{id}(id=${product.id})}" class="text-red-600 hover:underline mt-2">🔍 Details</a>
+
+      <form th:action="@{/cart/add/{cartId}/{productId}(cartId=${cartId}, productId=${product.id})}" method="post">
+        <button class="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700 w-full">🛒 In den Warenkorb</button>
       </form>
-    </td>
-  </tr>
-</table>
-
-<br>
-<a href="/products/new">Neues Produkt hinzufügen</a>
+    </div>
+  </div>
+</div>
 </body>
 </html>
-

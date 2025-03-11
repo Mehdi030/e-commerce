@@ -1,31 +1,40 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+  <meta charset="UTF-8">
   <title>Registrierung</title>
-  <link rel="stylesheet" href="/static/styles.css">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-<h2>Registrierung</h2>
+<body class="bg-white text-gray-900 dark:bg-black dark:text-white flex items-center justify-center min-h-screen">
+<div class="max-w-md bg-gray-100 dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+  <h2 class="text-3xl font-bold text-red-600">📝 Registrierung</h2>
 
-<!-- Fehlermeldungen anzeigen -->
-<p th:if="${message}" th:text="${message}" style="color: green;"></p>
+  <!-- Fehlermeldungen anzeigen -->
+  <p th:if="${message}" th:text="${message}" class="mt-3 p-3 bg-green-500 text-white rounded"></p>
 
-<form th:action="@{/auth/register}" method="post" th:object="${user}">
-  <label>Benutzername:</label>
-  <input type="text" th:field="*{username}" required/><br/>
-  <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" style="color:red;"></span><br/>
+  <form th:action="@{/auth/register}" method="post" th:object="${user}" class="mt-4">
+    <div class="text-left">
+      <label class="block font-medium">👤 Benutzername:</label>
+      <input type="text" th:field="*{username}" required class="w-full p-2 border rounded focus:ring-2 focus:ring-red-500">
+      <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="text-red-500"></span>
+    </div>
 
-  <label>Email:</label>
-  <input type="email" th:field="*{email}" required/><br/>
-  <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" style="color:red;"></span><br/>
+    <div class="text-left mt-3">
+      <label class="block font-medium">📧 Email:</label>
+      <input type="email" th:field="*{email}" required class="w-full p-2 border rounded focus:ring-2 focus:ring-red-500">
+      <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-red-500"></span>
+    </div>
 
-  <label>Passwort:</label>
-  <input type="password" th:field="*{password}" required/><br/>
-  <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" style="color:red;"></span><br/>
+    <div class="text-left mt-3">
+      <label class="block font-medium">🔑 Passwort:</label>
+      <input type="password" th:field="*{password}" required class="w-full p-2 border rounded focus:ring-2 focus:ring-red-500">
+      <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-red-500"></span>
+    </div>
 
-  <button type="submit">Registrieren</button>
-</form>
+    <button type="submit" class="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700 w-full">✅ Registrieren</button>
+  </form>
 
-<p>Schon registriert? <a th:href="@{/auth/login}">Hier einloggen</a></p>
+  <p class="mt-4">Schon registriert? <a th:href="@{/auth/login}" class="text-red-600 hover:underline">Hier einloggen</a></p>
+</div>
 </body>
 </html>
