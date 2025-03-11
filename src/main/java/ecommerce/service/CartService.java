@@ -7,11 +7,7 @@ import ecommerce.repository.CartItemRepository;
 import ecommerce.repository.CartRepository;
 import ecommerce.repository.ProductRepository;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -26,6 +22,14 @@ public class CartService {
         this.productRepository = productRepository;
     }
 
+    // ✅ Erstellt einen neuen Warenkorb und gibt die ID zurück
+    public UUID createCart() {
+        Cart cart = new Cart();
+        cartRepository.save(cart);
+        return cart.getId();
+    }
+
+    // ✅ Warenkorb abrufen oder neuen erstellen
     public Cart getCart(UUID cartId) {
         return cartRepository.findById(cartId).orElseGet(() -> {
             Cart newCart = new Cart();
@@ -34,58 +38,75 @@ public class CartService {
         });
     }
 
+    // ✅ Produkt zum Warenkorb hinzufügen
     public void addItemToCart(UUID cartId, UUID productId, int quantity) {
         Cart cart = getCart(cartId);
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Produkt nicht gefunden"));
+        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("Produkt nicht gefunden"));
 
-        Optional<CartItem> existingItem = cart.getCartItems().stream()
+        CartItem cartItem = cart.getCartItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
-                .findFirst();
+                .findFirst()
+                .orElse(null);
 
-        if (existingItem.isPresent()) {
-            CartItem cartItem = existingItem.get();
-            cartItem.setQuantity(cartItem.getQuantity() + quantity);
-            cartItemRepository.save(cartItem);
+        if (cartItem == null) {
+            cartItem = new CartItem(cart, product, quantity);
+            cart.getCartItems().add(cartItem);
         } else {
-            CartItem newItem = new CartItem(cart, product, quantity);
-            cart.getCartItems().add(newItem);
-            cartItemRepository.save(newItem);
+            cartItem.setQuantity(cartItem.getQuantity() + quantity);
+        }
+
+        cartItemRepository.save(cartItem);
+        updateTotalPrice(cart);
+        cartRepository.save(cart);
+    }
+
+    // ✅ Produkt aus Warenkorb entfernen
+    public void removeItemFromCart(UUID cartId, UUID productId) {
+        Cart cart = getCart(cartId);
+        cart.getCartItems().removeIf(cartItem -> {
+            boolean match = cartItem.getProduct().getId().equals(productId);
+            if (match) cartItemRepository.delete(cartItem);
+            return match;
+        });
+
+        updateTotalPrice(cart);
+        cartRepository.save(cart);
+    }
+
+    // ✅ Produktmenge aktualisieren
+    public void updateItemQuantity(UUID cartId, UUID productId, int newQuantity) {
+        Cart cart = getCart(cartId);
+        CartItem cartItem = cart.getCartItems().stream()
+                .filter(item -> item.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Produkt nicht im Warenkorb"));
+
+        if (newQuantity <= 0) {
+            cart.getCartItems().remove(cartItem);
+            cartItemRepository.delete(cartItem);
+        } else {
+            cartItem.setQuantity(newQuantity);
+            cartItemRepository.save(cartItem);
         }
 
         updateTotalPrice(cart);
         cartRepository.save(cart);
     }
 
-    public void removeItemFromCart(UUID cartId, UUID productId) {
-        Cart cart = getCart(cartId);
-        cart.getCartItems().removeIf(item -> item.getProduct().getId().equals(productId));
-        updateTotalPrice(cart);
-        cartRepository.save(cart);
-    }
-
-    public void updateItemQuantity(UUID cartId, UUID productId, int quantity) {
-        Cart cart = getCart(cartId);
-        cart.getCartItems().forEach(item -> {
-            if (item.getProduct().getId().equals(productId)) {
-                item.setQuantity(quantity);
-            }
-        });
-        updateTotalPrice(cart);
-        cartRepository.save(cart);
-    }
-
+    // ✅ Gesamten Warenkorb leeren
     public void clearCart(UUID cartId) {
         Cart cart = getCart(cartId);
+        cartItemRepository.deleteAll(cart.getCartItems());
         cart.getCartItems().clear();
         cart.setTotalPrice(BigDecimal.ZERO);
         cartRepository.save(cart);
     }
 
+    // ✅ Aktualisiert den Gesamtpreis
     private void updateTotalPrice(Cart cart) {
-        BigDecimal total = cart.getCartItems().stream()
-                .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+        BigDecimal totalPrice = cart.getCartItems().stream()
+                .map(CartItem::getPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        cart.setTotalPrice(total);
+        cart.setTotalPrice(totalPrice);
     }
 }

@@ -22,7 +22,7 @@ public class CartController {
 
     @ModelAttribute("cartId")
     public UUID initializeCart() {
-        return UUID.randomUUID(); // Falls keine Session existiert, neuen Warenkorb erstellen
+        return cartService.createCart();
     }
 
     @GetMapping
@@ -33,8 +33,8 @@ public class CartController {
     }
 
     @PostMapping("/add/{productId}")
-    public String addToCart(@ModelAttribute("cartId") UUID cartId, @PathVariable UUID productId, @RequestParam int quantity) {
-        cartService.addItemToCart(cartId, productId, quantity);
+    public String addToCart(@ModelAttribute("cartId") UUID cartId, @PathVariable UUID productId) {
+        cartService.addItemToCart(cartId, productId, 1); // Standardmenge 1
         return "redirect:/cart";
     }
 

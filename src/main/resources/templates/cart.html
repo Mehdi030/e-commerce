@@ -1,32 +1,49 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Warenkorb</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-<h2>Dein Warenkorb</h2>
-<table>
-    <thead>
-    <tr>
-        <th>Produkt</th>
-        <th>Menge</th>
-        <th>Preis</th>
-        <th>Aktion</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="cartItem : ${cartItems}">
-        <td th:text="${cartItem.product.name}"></td>
-        <td th:text="${cartItem.quantity}"></td>
-        <td th:text="${cartItem.price}"></td>
-        <td>
-            <form th:action="@{/cart/remove/{id}(id=${cartItem.id})}" method="post">
-                <button type="submit">Entfernen</button>
-            </form>
-        </td>
-    </tr>
-    </tbody>
-</table>
-<a href="/products">Zurück zu den Produkten</a>
+<body class="bg-white text-gray-900 dark:bg-black dark:text-white flex items-center justify-center min-h-screen">
+<div class="max-w-4xl bg-gray-100 dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+    <h1 class="text-3xl font-bold text-red-600">🛒 Dein Warenkorb</h1>
+
+    <table class="w-full mt-6 border border-gray-300 dark:border-gray-700">
+        <thead class="bg-gray-100 dark:bg-gray-800">
+        <tr>
+            <th class="p-3">Produkt</th>
+            <th class="p-3">Menge</th>
+            <th class="p-3">Preis</th>
+            <th class="p-3">Aktion</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="cartItem : ${cart.cartItems}" class="border-t border-gray-300 dark:border-gray-700">
+            <td class="p-3" th:text="${cartItem.product.name}"></td>
+            <td class="p-3">
+                <form th:action="@{/cart/update/{productId}(productId=${cartItem.product.id})}" method="post">
+                    <input type="number" name="quantity" th:value="${cartItem.quantity}" min="1" class="p-2 border">
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">🔄 Aktualisieren</button>
+                </form>
+            </td>
+            <td class="p-3" th:text="${cartItem.price} + ' €'"></td>
+            <td class="p-3">
+                <form th:action="@{/cart/remove/{productId}(productId=${cartItem.product.id})}" method="post">
+                    <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">🗑️ Entfernen</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p class="mt-4 text-xl font-bold">Gesamtpreis: <span th:text="${cart.totalPrice} + ' €'"></span></p>
+
+    <form th:action="@{/cart/clear}" method="post">
+        <button type="submit" class="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">🗑️ Warenkorb leeren</button>
+    </form>
+
+    <a href="/products" class="mt-4 inline-block text-red-600 hover:underline">🔙 Zurück zu den Produkten</a>
+</div>
 </body>
 </html>
