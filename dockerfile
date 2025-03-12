@@ -13,3 +13,5 @@ RUN ./gradlew build --no-daemon
 
 # 5. JAR Datei ausführen
 CMD ["java", "-jar", "build/libs/shopping-cart.jar"]
+
+RUN ./gradlew build -x test --no-daemon
