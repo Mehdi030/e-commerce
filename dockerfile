@@ -1,25 +1,19 @@
-# 1. Base Image
-FROM openjdk:17-jdk-slim AS build
-
-# 2. Arbeitsverzeichnis setzen
-WORKDIR /app
-
-# 3. Alle Projektdateien kopieren
-COPY . .
-
-# 4. Gradle Wrapper ausführbar machen und Build starten
-RUN chmod +x gradlew && ./gradlew build -x test --no-daemon
-
-# 5. Neues Image für die App
+# 1. Basis-Image mit Java 17
 FROM openjdk:17-jdk-slim
 
+# 2. Arbeitsverzeichnis im Container
 WORKDIR /app
 
-# 6. JAR-Datei aus dem Build-Container kopieren
-COPY --from=build /app/build/libs/shopping-cart.jar app.jar
+# 3. Kopiere nur die Build-Skripte (damit Caching funktioniert)
+COPY build.gradle settings.gradle gradlew ./
+COPY gradle gradle
 
-# 7. Port für Spring Boot freigeben
-EXPOSE 8080
+# 4. Installiere die Abhängigkeiten
+RUN chmod +x gradlew
+RUN ./gradlew dependencies --no-daemon
 
-# 8. Startbefehl setzen
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# 5. Kopiere nur den Quellcode (ohne "build" & ".gradle")
+COPY src src
+
+# 6. Starte die Anwendung mit DevTools
+CMD ["./gradlew", "bootRun"]
