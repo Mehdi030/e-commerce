@@ -1,14 +1,14 @@
-# Base Image
+# 1. Base Image
 FROM openjdk:17-jdk-slim
 
-# Arbeitsverzeichnis setzen
+# 2. Arbeitsverzeichnis setzen
 WORKDIR /app
 
-# Projektdateien kopieren
+# 3. JAR-Datei kopieren
 COPY build/libs/shopping-cart.jar app.jar
 
-# Port für Spring Boot freigeben
+# 4. Port für Spring Boot freigeben
 EXPOSE 8080
 
-# Startbefehl korrigieren
-CMD ["java", "-jar", "app.jar"]
+# 5. Startbefehl setzen
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
