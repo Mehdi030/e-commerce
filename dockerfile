@@ -1,18 +1,14 @@
-# 1. Base Image
+# Base Image
 FROM openjdk:17-jdk-slim
 
-# 2. Arbeitsverzeichnis erstellen
+# Arbeitsverzeichnis setzen
 WORKDIR /app
 
-# 3. Projektdateien kopieren
-COPY . .
+# Projektdateien kopieren
+COPY build/libs/shopping-cart.jar app.jar
 
-# 4. Build mit Gradle (Tests werden übersprungen)
-RUN chmod +x gradlew
-RUN ./gradlew build -x test --no-daemon
+# Port für Spring Boot freigeben
+EXPOSE 8080
 
-# 5. Umbenennen der JAR-Datei, falls notwendig
-RUN mv build/libs/shopping-cart-0.0.1-SNAPSHOT.jar build/libs/shopping-cart.jar
-
-# 6. JAR Datei ausführen
-CMD ["java", "-jar", "build/libs/shopping-cart.jar"]
+# Startbefehl korrigieren
+CMD ["java", "-jar", "app.jar"]
