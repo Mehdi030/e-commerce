@@ -1,23 +1,15 @@
-# Use Java 17 as base image
+# 1. Base Image
 FROM openjdk:17-jdk-slim
 
-# Set working directory inside the container
+# 2. Arbeitsverzeichnis erstellen
 WORKDIR /app
 
-# Copy everything from the project directory
+# 3. Projektdateien kopieren
 COPY . .
 
-# 🔥 Make sure `gradlew` is executable
+# 4. Build mit Gradle
 RUN chmod +x gradlew
-
-# Build the project inside the container
 RUN ./gradlew build --no-daemon
 
-# Copy the generated JAR file
-COPY build/libs/*.jar app.jar
-
-# Expose port 8080
-EXPOSE 8080
-
-# Run the application
-CMD ["java", "-jar", "app.jar"]
+# 5. JAR Datei ausführen
+CMD ["java", "-jar", "build/libs/shopping-cart.jar"]
