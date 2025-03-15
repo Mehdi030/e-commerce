@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Willkommen im Shopping Cart</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-900 dark:bg-black dark:text-white flex items-center justify-center min-h-screen">
+<div class="max-w-3xl bg-gray-100 dark:bg-gray-800 p-8 rounded-lg shadow-lg text-center">
+    <h1 class="text-4xl font-bold text-red-600">🛍 Willkommen im Shopping Cart!</h1>
+    <p class="mt-4 text-lg">Hier kannst du die besten Produkte kaufen.</p>
+
+    <div class="mt-6 flex flex-col sm:flex-row justify-center gap-4">
+        <a th:href="@{/products}" class="bg-red-500 text-white px-6 py-3 rounded hover:bg-red-700 text-lg">📦 Produkte ansehen</a>
+        <a th:href="@{/cart}" class="bg-red-500 text-white px-6 py-3 rounded hover:bg-red-700 text-lg">🛒 Warenkorb anzeigen</a>
+    </div>
+</div>
+</body>
+</html>
